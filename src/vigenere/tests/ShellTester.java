@@ -1,9 +1,8 @@
-package ciphers.vigenere.testers;
-
+package vigenere.tests;
 
 import java.util.Scanner;
 
-import ciphers.vigenere.Vigenere;
+import vigenere.Vigenere;
 
 public class ShellTester {
 	

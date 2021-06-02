@@ -1,6 +1,6 @@
-package ciphers.vigenere.testers;
+package vigenere.tests;
 
-import ciphers.vigenere.Vigenere;
+import vigenere.Vigenere;
 
 public class RandomKeyGeneratorTester {
 

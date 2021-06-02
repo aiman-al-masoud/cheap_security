@@ -1,4 +1,4 @@
-package ciphers.vigenere;
+package vigenere;
 
 import java.util.Random;
 
