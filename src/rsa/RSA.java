@@ -1,5 +1,13 @@
 package rsa;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,8 +26,9 @@ import rsa.primes.Primebably;
  */
 
 
-public class RSA {
+public class RSA implements Serializable{
 
+	
 	private BigInteger publicExponentE;
 	private BigInteger privateExponentD;
 	private BigInteger firstPrimeP;
@@ -45,6 +54,16 @@ public class RSA {
 			}
 		}
 
+	}
+	
+	
+	/**
+	 * Initialize RSA with a pair of ready-found primes
+	 * @param firstPrimeP
+	 * @param secondPrimeQ
+	 */
+	public RSA(String firstPrimeP, String secondPrimeQ ) {
+		generateKeys(firstPrimeP, secondPrimeQ);
 	}
 
 
@@ -209,7 +228,7 @@ public class RSA {
 
 
 	/**
-	 * Deciphers a string of space-separeted numbers assumed to be a string of chars encrypted using this RSA's public key.
+	 * Deciphers a string of space-separated numbers assumed to be a string of chars encrypted using this RSA's public key.
 	 * @param cipherText
 	 * @return
 	 */
@@ -224,6 +243,32 @@ public class RSA {
 		return deciphered;
 	}
 
+	
+	
+	public void save(String pathname){
+		try {
+			ObjectOutputStream objOutStream = new ObjectOutputStream(new FileOutputStream(pathname));
+			objOutStream.writeObject(this);
+			objOutStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static RSA load(String pathname) {
+		try {
+			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(new File(pathname)));
+			return (RSA)objInputStream.readObject();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
 	
 	
 	

@@ -44,7 +44,7 @@ public class Primebably {
 		while(!bigInt.isProbablePrime(1)) {
 			bigInt = bigInt.add(new BigInteger("1"));
 			//not a prime!
-			logger.info(bigInt+" definitely not a prime");
+			//logger.info(bigInt+" definitely not a prime");
 		}
 		
 		//succes! (Prime-bably)
