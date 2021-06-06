@@ -134,13 +134,16 @@ public class RSA {
 	 * @param totientPhi
 	 * @return
 	 */
-	private BigInteger generatePublicExponentE(BigInteger totientPhi) {
+	private BigInteger generatePublicExponentE(BigInteger totientPhi) {	
 		
-		//BigInteger randomNum = new BigInteger(ThreadLocalRandom.current().nextInt(1 , totientPhi.intValue()-1)+"");
+		BigInteger 	randomNum = new BigInteger(ThreadLocalRandom.current().nextInt(1 , 20 )+"");
+
+		do {
+			randomNum = randomNum.add(new BigInteger("1"));
+		}while( extendedEuclidean(randomNum.toString(), totientPhi.toString())[0].intValue()!=1  );
 		
-		//System.out.println(randomNum);
-		
-		return new BigInteger("3");
+		//return new BigInteger("3");
+		return randomNum;
 	}
 	
 
