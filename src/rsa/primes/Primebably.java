@@ -48,7 +48,7 @@ public class Primebably {
 		}
 		
 		//succes! (Prime-bably)
-		logger.info(bigInt+" primebably!");
+		//logger.info(bigInt+" primebably!");
 		return bigInt;
 	}
 	
