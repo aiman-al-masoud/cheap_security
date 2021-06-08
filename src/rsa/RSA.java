@@ -26,7 +26,7 @@ import rsa.primes.Primebably;
  */
 
 
-public class RSA{
+public class RSA implements Serializable{
 
 
 	private BigInteger publicExponentE;
