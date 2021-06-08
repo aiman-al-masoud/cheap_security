@@ -26,7 +26,7 @@ import rsa.primes.Primebably;
  */
 
 
-public class RSA implements Serializable{
+public class RSA{
 
 
 	private BigInteger publicExponentE;
@@ -277,28 +277,6 @@ public class RSA implements Serializable{
 	
 	
 
-
-	public void save(String pathname){
-		try {
-			ObjectOutputStream objOutStream = new ObjectOutputStream(new FileOutputStream(pathname));
-			objOutStream.writeObject(this);
-			objOutStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static RSA load(String pathname) {
-		try {
-			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(new File(pathname)));
-			return (RSA)objInputStream.readObject();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 
 
