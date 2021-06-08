@@ -28,7 +28,7 @@ import rsa.primes.Primebably;
 
 public class RSA implements Serializable{
 
-	
+
 	private BigInteger publicExponentE;
 	private BigInteger privateExponentD;
 	private BigInteger firstPrimeP;
@@ -41,7 +41,7 @@ public class RSA implements Serializable{
 
 		//any number
 		int numberOfbaseTenDigitsOffset = ThreadLocalRandom.current().nextInt(1, 3); 
-		
+
 		boolean isOk = false;
 		while(!isOk) {
 			try {
@@ -55,8 +55,8 @@ public class RSA implements Serializable{
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * Initialize RSA with a pair of ready-found primes
 	 * @param firstPrimeP
@@ -118,14 +118,14 @@ public class RSA implements Serializable{
 
 
 	public void generateKeys(String firstPrimeP, String secondPrimeQ) {
-		
+
 		this.firstPrimeP = new BigInteger(firstPrimeP);
 		this.secondPrimeQ = new BigInteger(secondPrimeQ);
 		this.productN = this.firstPrimeP.multiply(this.secondPrimeQ);
 		this.totientPhi = (this.firstPrimeP.subtract(new BigInteger("1"))).multiply(this.secondPrimeQ.subtract(new BigInteger("1")));
 		this.publicExponentE = generatePublicExponentE(totientPhi);
 		this.privateExponentD = computePrivateKey(publicExponentE.toString(), totientPhi.toString());
-		
+
 		if(totientPhi.mod(publicExponentE).intValue()==0 || publicExponentE.compareTo(totientPhi) >0) {
 			throw new IllegalArgumentException("'e' must be less than and coprime to Phi!");
 		}
@@ -147,24 +147,24 @@ public class RSA implements Serializable{
 		return privateKey;
 	}
 
-	
+
 	/**
 	 * publicExponentE must be coprime and less than totientPhi.
 	 * @param totientPhi
 	 * @return
 	 */
 	private BigInteger generatePublicExponentE(BigInteger totientPhi) {	
-		
+
 		BigInteger 	randomNum = new BigInteger(ThreadLocalRandom.current().nextInt(1 , 20 )+"");
 
 		do {
 			randomNum = randomNum.add(new BigInteger("1"));
 		}while( extendedEuclidean(randomNum.toString(), totientPhi.toString())[0].intValue()!=1  );
-		
+
 		//return new BigInteger("3");
 		return randomNum;
 	}
-	
+
 
 
 	/**
@@ -197,54 +197,87 @@ public class RSA implements Serializable{
 
 
 	/**
-	 * @overload
-	 * Encrypt an ascii char, turning it into a String-represented int.
-	 * @param character
-	 * @param publicExponent
-	 * @param publicProductN
+	 *Encrypts a string of text, obtaining a single decimal number string.
+	 * @param plaintext
+	 * @param e
+	 * @param n
 	 * @return
 	 */
-	public String encrypt(char character, String publicExponent, String publicProductN) {
-		return encrypt( ((int)character)+"" , publicExponent, publicProductN);
+	public String encryptText(String plaintext, String e, String n) {
+
+		//convert whitespaces to uderscores, 'cuz spaces don't appear to work well with 7-bit ASCII for some reason :-( ...
+		String[] words = plaintext.split("\\s+");
+		plaintext = "";
+		for(String word : words) {
+			plaintext+=word+"_";
+		}
+		
+		
+		String binaryString = "";
+		//convert the plaintext into a (longish ;-( ) binary string 
+		for(byte b : plaintext.getBytes()) {
+			binaryString+=Integer.toBinaryString(b);
+		}
+		//System.out.println(binaryString);
+
+		//the binary string represents a number, you can convert it to base 10
+		BigInteger plainNumber = new BigInteger(binaryString, 2);
+		//System.out.println(plainNumber);
+
+		//the base 10 number can be raised to a power with a modulus (encrypted!)
+		String cipheredNumber = encrypt(plainNumber.toString(), e, n);
+		//System.out.println(cipheredNumber);
+
+		//NOW there is absolutely no way of getting the original binary string back without the private key! And no chance of applying frequency analysis!
+		return cipheredNumber;
 	}
 
 
 
 	/**
-	 * Encrypts a string of text into a series of integers, based on a provided public key (publicExponentE, publicProductN).
-	 * @param text
-	 * @param publicExponent
-	 * @param publicProductN
+	 * Turn a cipheredNumber string back to intelligible text
+	 * @param cipheredNumber
 	 * @return
 	 */
+	public String decryptText(String cipheredNumber) {
 
-	public String encryptText(String text, String publicExponentE, String publicProductN) {
-		String encrypted = "";
-		for(int i=0; i<text.length(); i++) {
-			encrypted+=encrypt(text.charAt(i), publicExponentE, publicProductN)+" ";
+		//the number can be deciphered...
+		String decipheredNumber = decrypt(cipheredNumber);
+		//System.out.println(decipheredNumber);
+
+		//converted back to a binary string... 
+		String decipheredBinaryString = new BigInteger(decipheredNumber).toString(2);
+		//System.out.println(decipheredBinaryString);
+
+		//and finally, the binary string can be interpreted as an array of (ASCII) chars
+		String decipheredText = "";
+		String accumulator = "";
+		for(int i =0; i<decipheredBinaryString.length(); i++) {
+
+			//accumulate chars of string till accumulator.lenth ==8
+			accumulator+=decipheredBinaryString.charAt(i);
+
+			//8 digits accumulated, proceed to converting them to an ASCII char
+			if(accumulator.length()==7) {
+				decipheredText+=(char)Integer.parseInt(accumulator,2);
+				accumulator=""; //reset accumulator!
+			}			
 		}
-		return encrypted;
-	}
 
-
-	/**
-	 * Deciphers a string of space-separated numbers assumed to be a string of chars encrypted using this RSA's public key.
-	 * @param cipherText
-	 * @return
-	 */
-	public String decryptText(String cipherText) {
-		String[] letters  = cipherText.split(" ");
-		String deciphered = "";
 		
-		for(String letter : letters) {
-			deciphered+=((char)Integer.parseInt(decrypt(letter)));
+		//convert underscores back to spaces
+		String[] words = decipheredText.split("_");
+		decipheredText = "";
+		for(String word : words) {
+			decipheredText+=word+" ";
 		}
 		
-		return deciphered;
+		return decipheredText;
 	}
-
 	
 	
+
+
 	public void save(String pathname){
 		try {
 			ObjectOutputStream objOutStream = new ObjectOutputStream(new FileOutputStream(pathname));
@@ -254,7 +287,7 @@ public class RSA implements Serializable{
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static RSA load(String pathname) {
 		try {
 			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(new File(pathname)));
@@ -266,14 +299,14 @@ public class RSA implements Serializable{
 		}
 		return null;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 
 
 
