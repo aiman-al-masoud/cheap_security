@@ -1,5 +1,6 @@
 package sha256;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
  * 
  *
  */
-public class SHA256 {
+public class SHA256 implements Serializable{
 
 	MessageDigest digest;
 

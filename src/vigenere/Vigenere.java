@@ -1,5 +1,6 @@
 package vigenere;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
@@ -25,7 +26,7 @@ import java.util.Random;
  *
  */
 
-public class Vigenere {
+public class Vigenere implements Serializable{
 
 	//this table is basically a 26*26 letters matrix
 	private char[][] tabulaRecta;
