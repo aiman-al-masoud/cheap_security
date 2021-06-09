@@ -173,6 +173,17 @@ public class RSA implements Serializable{
 
 		return plainNumInt.modPow(publicExponentInt, publicProductNInt).toString();	
 	}
+	
+	
+	/**
+	 * Encrypts a number with the private key of this object.
+	 * @param plainNum
+	 * @return
+	 */
+	public String encryptWithPrivate(String plainNum) {
+		return encrypt(plainNum, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
+	}
+	
 
 	/**
 	 * Uses private (its own) key to decipher messages sent to it by others.
@@ -180,16 +191,21 @@ public class RSA implements Serializable{
 	 * @return
 	 */
 
-	public String decrypt(String cipherNum) {
+	public String decrypt(String cipherNum, String d, String n) {
 		BigInteger cipherNumInt = new BigInteger(cipherNum);
 		BigInteger[] privateKey = getPrivateKey();
 
-		return cipherNumInt.modPow(privateKey[0], privateKey[1]).toString();
+		return cipherNumInt.modPow(new BigInteger(d), new BigInteger(n)).toString();
 	}
+	
+	public String decrypt(String cipherNum) {
+		return decrypt(cipherNum, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
+	}
+	
 
 
 	/**
-	 *Encrypts a string of text, obtaining a single decimal number string.
+	 * Encrypts a string of text, obtaining a single decimal number string.
 	 * @param plaintext
 	 * @param e
 	 * @param n
@@ -224,6 +240,18 @@ public class RSA implements Serializable{
 		return cipheredNumber;
 	}
 
+	
+	
+	/**
+	 * Encrypts text with this object's private key.
+	 * @param plaintext
+	 * @return
+	 */
+	public String encryptTextWithPrivate(String plaintext) {
+		return encryptText(plaintext,getPrivateKey()[0].toString(),  getPrivateKey()[1].toString());
+	}
+	
+	
 
 
 	/**
@@ -231,15 +259,13 @@ public class RSA implements Serializable{
 	 * @param cipheredNumber
 	 * @return
 	 */
-	public String decryptText(String cipheredNumber) {
+	public String decryptText(String cipheredNumber, String d, String n) {
 
 		//the number can be deciphered...
-		String decipheredNumber = decrypt(cipheredNumber);
-		//System.out.println(decipheredNumber);
+		String decipheredNumber = decrypt(cipheredNumber, d, n);
 
 		//converted back to a binary string... 
 		String decipheredBinaryString = new BigInteger(decipheredNumber).toString(2);
-		//System.out.println(decipheredBinaryString);
 
 		//and finally, the binary string can be interpreted as an array of (ASCII) chars
 		String decipheredText = "";
@@ -268,6 +294,11 @@ public class RSA implements Serializable{
 	}
 
 	
+	
+	
+	public String decryptText(String cipheredNumber) {
+		return decryptText(cipheredNumber, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
+	}
 	
 	
 	
