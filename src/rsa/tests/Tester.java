@@ -13,7 +13,7 @@ public class Tester {
 		RSA rsa = new RSA(300);
 		
 		//encrypt a string of chars. You can choose what public key to use for encryption.
-		String ecnrypted = rsa.encryptText("questo e un bel messaggio", rsa.getPublicKey()[0].toString(), rsa.getPublicKey()[1].toString());
+		String ecnrypted = rsa.encryptText("? ciao . , . / : -  0230 s ???", rsa.getPublicKey()[0].toString(), rsa.getPublicKey()[1].toString());
 		//decipher the string of chars using the RSA object's private key.
 		String decipher = rsa.decryptText(ecnrypted);
 		
@@ -21,6 +21,7 @@ public class Tester {
 		System.out.println(ecnrypted);
 		//print the deciphered string
 		System.out.println(decipher);
+		
 		
 		
 		//encrypt text with my private key

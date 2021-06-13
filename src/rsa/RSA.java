@@ -2,6 +2,7 @@ package rsa;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadLocalRandom;
 
 import rsa.primes.Primebably;
@@ -173,8 +174,8 @@ public class RSA implements Serializable{
 
 		return plainNumInt.modPow(publicExponentInt, publicProductNInt).toString();	
 	}
-	
-	
+
+
 	/**
 	 * Encrypts a number with the private key of this object.
 	 * @param plainNum
@@ -183,25 +184,32 @@ public class RSA implements Serializable{
 	public String encryptWithPrivate(String plainNum) {
 		return encrypt(plainNum, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
 	}
-	
 
+
+	
+	/**
+	 * Deciphers a number using any provided key.
+	 * @param cipherNum
+	 * @param d
+	 * @param n
+	 * @return
+	 */
+
+	public String decrypt(String cipherNum, String d, String n) {
+		BigInteger cipherNumInt = new BigInteger(cipherNum);
+		return cipherNumInt.modPow(new BigInteger(d), new BigInteger(n)).toString();
+	}
+	
 	/**
 	 * Uses private (its own) key to decipher messages sent to it by others.
 	 * @param cipherNum
 	 * @return
 	 */
 
-	public String decrypt(String cipherNum, String d, String n) {
-		BigInteger cipherNumInt = new BigInteger(cipherNum);
-		BigInteger[] privateKey = getPrivateKey();
-
-		return cipherNumInt.modPow(new BigInteger(d), new BigInteger(n)).toString();
-	}
-	
 	public String decrypt(String cipherNum) {
 		return decrypt(cipherNum, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
 	}
-	
+
 
 
 	/**
@@ -213,35 +221,31 @@ public class RSA implements Serializable{
 	 */
 	public String encryptText(String plaintext, String e, String n) {
 
-		//convert whitespaces to uderscores, 'cuz spaces don't appear to work well with 7-bit ASCII for some reason :-( ...
-		String[] words = plaintext.split("\\s+");
-		plaintext = "";
-		for(String word : words) {
-			plaintext+=word+"_";
-		}
-		
-		
-		String binaryString = "";
 		//convert the plaintext into a (longish ;-( ) binary string 
-		for(byte b : plaintext.getBytes()) {
-			binaryString+=Integer.toBinaryString(b);
-		}
-		//System.out.println(binaryString);
+		String binaryString = "";
 
+		for(byte b : plaintext.getBytes(StandardCharsets.US_ASCII)) {
+			
+			//get the bytes corresponding to the encoding of the chars
+			String binaryBuf = Integer.toBinaryString(b);	
+			//make sure that each binaryBuf is exactly 8 bits long. 
+			binaryBuf = addBinaryPadding(8, binaryBuf);
+			//concatenate the binaryBufs to form a huge binary string
+			binaryString+=binaryBuf;
+		}
+				
 		//the binary string represents a number, you can convert it to base 10
 		BigInteger plainNumber = new BigInteger(binaryString, 2);
-		//System.out.println(plainNumber);
 
 		//the base 10 number can be raised to a power with a modulus (encrypted!)
 		String cipheredNumber = encrypt(plainNumber.toString(), e, n);
-		//System.out.println(cipheredNumber);
 
 		//NOW there is absolutely no way of getting the original binary string back without the private key! And no chance of applying frequency analysis!
 		return cipheredNumber;
 	}
 
-	
-	
+
+
 	/**
 	 * Encrypts text with this object's private key.
 	 * @param plaintext
@@ -250,8 +254,8 @@ public class RSA implements Serializable{
 	public String encryptTextWithPrivate(String plaintext) {
 		return encryptText(plaintext,getPrivateKey()[0].toString(),  getPrivateKey()[1].toString());
 	}
-	
-	
+
+
 
 
 	/**
@@ -266,44 +270,39 @@ public class RSA implements Serializable{
 
 		//converted back to a binary string... 
 		String decipheredBinaryString = new BigInteger(decipheredNumber).toString(2);
-
-		//and finally, the binary string can be interpreted as an array of (ASCII) chars
-		String decipheredText = "";
-		String accumulator = "";
-		for(int i =0; i<decipheredBinaryString.length(); i++) {
-
-			//accumulate chars of string till accumulator.lenth ==8
-			accumulator+=decipheredBinaryString.charAt(i);
-
-			//8 digits accumulated, proceed to converting them to an ASCII char
-			if(accumulator.length()==7) {
-				decipheredText+=(char)Integer.parseInt(accumulator,2);
-				accumulator=""; //reset accumulator!
-			}			
-		}
-
+			
+		//add a non-significant zero.
+		decipheredBinaryString="0"+decipheredBinaryString;
 		
-		//convert underscores back to spaces
-		String[] words = decipheredText.split("_");
-		decipheredText = "";
-		for(String word : words) {
-			decipheredText+=word+" ";
-		}
+		//convert the binary string to an array of bytes
+		byte[] bytesCopy = new BigInteger(decipheredBinaryString, 2).toByteArray();
+
+		//convert the array of bytes into an ascii-encoded string
+		String decipheredText = new String(bytesCopy, StandardCharsets.US_ASCII);
 		
 		return decipheredText;
 	}
 
-	
-	
-	
+
 	public String decryptText(String cipheredNumber) {
 		return decryptText(cipheredNumber, getPrivateKey()[0].toString(), getPrivateKey()[1].toString());
 	}
-	
-	
-	
-	
 
+
+	/**
+	 * Make a binary word compatible with a given word-size by adding zeroes to the left.
+	 * @param sizeOfWordInBits
+	 * @param word
+	 * @return
+	 */
+	public static String addBinaryPadding(int sizeOfWordInBits, String word) { 
+		String padding = "";
+		for(int i =0; i<sizeOfWordInBits-word.length(); i++) {
+			padding+="0";
+		}
+		return padding+word;
+	}
+	
 
 
 
